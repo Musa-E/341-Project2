@@ -24,7 +24,36 @@ import sqlite3
 #          occurs, a msg is output and None is returned.
 #
 def select_one_row(dbConn, sql, parameters = None):
-    pass
+
+    # Invalid Database Connection
+    if (dbConn is None):
+        print()
+        return None
+
+    # No query is provided
+    elif (sql is None or sql == ""):
+        print()
+        return None
+
+    # Wildcards are used, but no values to fill in for them are provided
+    elif ('?' in sql or '_' in sql and parameters == None):
+        print()
+        return None
+    
+    dbCursor = dbConn.cursor()
+    result = None
+
+    result = dbCursor.execute(sql, parameters);
+
+    # Get the result
+    if (result is not None):
+
+        # Return only the first row
+        return result.fetchone()
+    else:
+        return ()
+
+    # End select_one_row()
 
 
 ##################################################################
@@ -44,7 +73,40 @@ def select_one_row(dbConn, sql, parameters = None):
 #          output and None is returned.
 #
 def select_n_rows(dbConn, sql, parameters = None):
-    pass
+    
+    # Invalid Database Connection
+    if (dbConn is None):
+        print()
+        return None
+
+    # No query is provided
+    elif (sql is None or sql == ""):
+        print()
+        return None
+
+    # Wildcards are used, but no values to fill in for them are provided
+    elif ('?' in sql or '_' in sql and parameters == None):
+        print()
+        return None
+    
+    dbCursor = dbConn.cursor()
+    result = None
+
+    result = dbCursor.execute(sql, parameters);
+
+    # Get the result
+    if (result is not None):
+
+        # If no data is found, return an empty list
+        if (len(result) == 0):
+            return []
+    
+        # Return all rows
+        return result.fetchall()
+    else:
+        return []
+    
+    # End select_n_rows()
 
 
 ##################################################################
@@ -67,4 +129,40 @@ def select_n_rows(dbConn, sql, parameters = None):
 #          because the where condition was false?).
 #
 def perform_action(dbConn, sql, parameters = None):
+
+    # Invalid Database Connection
+    if (dbConn is None):
+        print()
+        return -1
+
+    # No query is provided
+    elif (sql is None or sql == ""):
+        print()
+        return -1
+
+    # Wildcards are used, but no values to fill in for them are provided
+    elif ('?' in sql or '_' in sql and parameters == None):
+        print()
+        return -1
+    
+    dbCursor = dbConn.cursor()
+    result = None
+
+    result = dbCursor.execute(sql, parameters);
+
+    # Commit the changes to the database
+    dbConn.commit()
+
+    # Return the number of rows modified
+    return result.rowcount
+
+    # Get the result
+    # if (result is not None):
+
+    #     # Return only the first row
+    #     return result.fetchone()
+    # else:
+    #     return ()
+
+    # End perform_action()
     pass
