@@ -31,19 +31,22 @@ def select_one_row(dbConn, sql, parameters = None):
         return None
 
     # No query is provided
-    elif (sql is None or sql == ""):
-        print()
-        return None
+    # elif (sql is None or sql == ""):
+    #     print()
+    #     return None
 
     # Wildcards are used, but no values to fill in for them are provided
-    elif ('?' in sql or '_' in sql and parameters == None):
-        print()
-        return None
+    # elif ('?' in sql or '_' in sql and parameters == None):
+    #     print()
+    #     return None
     
     dbCursor = dbConn.cursor()
     result = None
 
-    result = dbCursor.execute(sql, parameters);
+    if (parameters is None):
+        result = dbCursor.execute(sql)
+    else:
+        result = dbCursor.execute(sql, parameters)
 
     # Get the result
     if (result is not None):
@@ -81,28 +84,40 @@ def select_n_rows(dbConn, sql, parameters = None):
 
     # No query is provided
     elif (sql is None or sql == ""):
-        print()
+        print("**[1] A SQL error has occured.\n")
         return None
 
     # Wildcards are used, but no values to fill in for them are provided
-    elif ('?' in sql or '_' in sql and parameters == None):
-        print()
-        return None
+    # elif ('?' in sql or '_' in sql and parameters == None):
+        # print("**[2] An error has occured.\n")
+        # print("!!QUERY:", sql)
+        
+        # if (parameters is not None):
+        #     print("\nPARAMETER(S):", parameters)
+
+        # return None
     
     dbCursor = dbConn.cursor()
-    result = None
 
-    result = dbCursor.execute(sql, parameters);
+    # print("Query:", sql)
+    # print("\nPARAMETER(S):", parameters)
 
-    # Get the result
-    if (result is not None):
-
-        # If no data is found, return an empty list
-        if (len(result) == 0):
-            return []
     
+    # print("Parameter is of type:", type(parameters))
+    # print("As a tuple: ", tuple(parameters))
+    if (parameters is not None):
+        parameters = (parameters, parameters)
+    else:
+        parameters = (None, None)
+
+    result = dbCursor.execute(sql, parameters)
+
+    row = result.fetchall()
+    # Get the result
+    if (row is not None):
+
         # Return all rows
-        return result.fetchall()
+        return row
     else:
         return []
     

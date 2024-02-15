@@ -20,55 +20,13 @@ def print_stats(dbConn):
     if (dbConn is None):
         print()
         return None
-    
-    dbCursor = dbConn.cursor()
-    
-    Lobbyists = dbCursor.execute("""
-        SELECT
-            COUNT(DISTINCT LobbyistAndEmployer.Lobbyist_ID) As Lobbyists
-        FROM
-            LobbyistAndEmployer;
-    """)
 
+    # Call the object tier's functions
+    print("  Number of Lobbyists:", objecttier.num_lobbyists(dbConn))
+    print("  Number of Employers:", objecttier.num_employers(dbConn))
+    print("  Number of Clients:", objecttier.num_clients(dbConn))
 
-    if (Lobbyists is not None):
-        row = Lobbyists.fetchone()
-        print("  Number of Lobbyists:", f"{row[0]:,}")
-
-
-    Employers = dbCursor.execute("""
-        SELECT
-            COUNT(DISTINCT EmployerInfo.Employer_ID) AS Employers
-        FROM
-            EmployerInfo
-        LEFT JOIN
-            LobbyistAndEmployer ON EmployerInfo.Employer_ID = LobbyistAndEmployer.Employer_ID;
-    """);
-
-    if (Employers is not None):
-        row = Employers.fetchone()
-        print("  Number of Employers:", f"{row[0]:,}")
-
-
-    Clients = dbCursor.execute("""
-        SELECT
-            COUNT(DISTINCT ClientInfo.Client_ID) As Clients
-        FROM
-            ClientInfo;                                       
-    """)
-
-    if (Clients is not None):
-        row = Clients.fetchone()
-        print("  Number of Clients:", f"{row[0]:,}")
-
-    # Get the result
-    # if (result is not None):
-
-    #     rows = result[0]
-        
-    #     return result.fetchall()
-    # else:
-    #     return ()
+    # End print_stats()
 
 
 
@@ -76,8 +34,8 @@ def commandDriver(userChoice, dbConn):
 
     # If the input is 1-5, execute the relevant processes
     if (userChoice == '1'):
-        print("Command #1 has not been implemented yet.\nExiting...\n")
-        exit(0)
+        nameSearch = input("Enter lobbyist name (first or last, wildcards _ and % supported): ")
+        objecttier.get_lobbyists(dbConn, nameSearch)
 
     elif (userChoice == '2'):
         # station_Search_Percentages(dbConn)
