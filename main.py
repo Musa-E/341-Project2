@@ -30,6 +30,7 @@ def print_stats(dbConn):
 
 
 
+# Handles each command's flow based on user input
 def commandDriver(userChoice, dbConn):
 
     # If the input is 1-5, execute the relevant processes
@@ -38,9 +39,8 @@ def commandDriver(userChoice, dbConn):
         objecttier.get_lobbyists(dbConn, nameSearch)
 
     elif (userChoice == '2'):
-        # station_Search_Percentages(dbConn)
-        print("Command #2 has not been implemented yet.\nExiting...\n")
-        exit(0)
+        IDSearch = input("Enter Lobbyist ID: ")
+        objecttier.get_lobbyist_details(dbConn, IDSearch)
 
     elif (userChoice == '3'):
         # weekdayRidershipByName(dbConn)

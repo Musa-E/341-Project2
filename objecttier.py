@@ -335,9 +335,8 @@ def get_lobbyists(dbConn, pattern):
       ORDER BY
          Lobbyists ASC;
    """
-
-   # print("Pattern/Search: " + pattern)
-
+   
+   pattern = ''.join(pattern)
    # Search with the above query
    result = datatier.select_n_rows(dbConn, query, pattern)
 
@@ -354,18 +353,24 @@ def get_lobbyists(dbConn, pattern):
       if (len(result) == 0):
          return []
 
+      Lobbyists = []
+      # Iterate through results and store info in object(s)
       for row in result:
          Lobbyist_ID = row[0]
          First_Name = row[1]
          Last_Name = row[2]
          Phone = row[3]
 
+         # Add a new Lobbyist object to the list & Output info
+         Lobbyists.append(Lobbyist(Lobbyist_ID, First_Name, Last_Name, Phone))
          print(Lobbyist_ID, ": " + First_Name, Last_Name + " Phone:", Phone)
 
-      print()
-      return result[0]
+      print() # Formatting
+      return Lobbyists
    else:
-      return []
+      return [] # Return an empty list
+   
+   # End get_lobbyists()
 
 
 
@@ -383,7 +388,98 @@ def get_lobbyists(dbConn, pattern):
 #          case an error msg is already output).
 #
 def get_lobbyist_details(dbConn, lobbyist_id):
-   pass
+
+   # Query - Compensation Amount is incorrect (Duplicates from the JOIN statements?)
+   query = """
+      SELECT
+         LobbyistInfo.Lobbyist_ID,
+         LobbyistInfo.Salutation,
+         LobbyistInfo.First_Name,
+         LobbyistInfo.Middle_Initial,
+         LobbyistInfo.Last_Name,
+         LobbyistInfo.Suffix,
+         LobbyistInfo.Address_1,
+         LobbyistInfo.Address_2,
+         LobbyistInfo.City,
+         LobbyistInfo.State_Initial,
+         LobbyistInfo.ZipCode,
+         LobbyistInfo.Country,
+         LobbyistInfo.Email,
+         LobbyistInfo.Phone,
+         LobbyistInfo.Fax,
+         GROUP_CONCAT(DISTINCT LobbyistYears.Year) AS Years_Registered,
+         GROUP_CONCAT(DISTINCT EmployerInfo.Employer_Name) AS Employers,
+         SUM(Compensation.Compensation_Amount) AS TotalCompensation
+      FROM
+         LobbyistInfo
+      LEFT JOIN
+         LobbyistYears ON LobbyistYears.Lobbyist_ID = LobbyistInfo.Lobbyist_ID
+      LEFT JOIN
+         LobbyistAndEmployer ON LobbyistAndEmployer.Lobbyist_ID = LobbyistInfo.Lobbyist_ID
+      LEFT JOIN
+         EmployerInfo ON EmployerInfo.Employer_ID = LobbyistAndEmployer.Employer_ID
+      JOIN
+         Compensation ON Compensation.Lobbyist_ID = LobbyistInfo.Lobbyist_ID
+      WHERE
+         LobbyistInfo.Lobbyist_ID = ?
+      GROUP BY
+         LobbyistInfo.Lobbyist_ID, Salutation, First_Name, Middle_Initial, Last_Name, Suffix, LobbyistInfo.Address_1, LobbyistInfo.Address_2, LobbyistInfo.City, LobbyistInfo.State_Initial, LobbyistInfo.ZipCode, LobbyistInfo.Country, LobbyistInfo.Email, LobbyistInfo.Phone, LobbyistInfo.Fax
+      ORDER BY
+         LobbyistInfo.Lobbyist_ID ASC;
+   """
+
+   lobbyist_id = (''.join(lobbyist_id),)
+   # Search with the above query
+   result = datatier.select_n_rows(dbConn, query, lobbyist_id)
+
+   # rows = result.fetchall()
+
+   if (result is not None):
+      
+      # No matches found; return an empty list
+      if (len(result) == 0):
+         return None
+      
+      print(lobbyist_id, ":\n")
+
+      Lobbyists = []
+      # Iterate through results and store info in object(s)
+      for row in result:
+
+         Lobbyist_ID = row[0]
+         Salutation = row[1]
+         First_Name = row[2]
+         Middle_Initial = row[3]
+         Last_Name = row[4]
+         Suffix = row[5]
+         Address_1 = row[6]
+         Address_2 = row[7]
+         City = row[8]
+         State_Initial = row[9]
+         ZipCode = row[10]
+         Country = row[11]
+         Email = row[12]
+         Phone = row[13]
+         Fax = row[14]
+         Years_Registered = row[15]
+         Employers = row[16]
+         TotalCompensation = row[17]
+         
+
+         # Add a new Lobbyist object to the list & Output info
+         Lobbyists.append(
+            LobbyistDetails(Lobbyist_ID, Salutation, First_Name, Middle_Initial, Last_Name, Suffix,
+            Address_1, Address_2, City, State_Initial, ZipCode, Country, Email, Phone, Fax, 
+            Years_Registered, Employers, TotalCompensation)
+         )
+      print("  " + First_Name, Middle_Initial, Last_Name + "\n Phone:", Phone)
+
+      print() # Formatting
+      return Lobbyists
+   else:
+      return [] # Return an empty list
+   
+   # End get_lobbyists()
          
 
 ##################################################################

@@ -86,30 +86,41 @@ def select_n_rows(dbConn, sql, parameters = None):
     elif (sql is None or sql == ""):
         print("**[1] A SQL error has occured.\n")
         return None
-
-    # Wildcards are used, but no values to fill in for them are provided
-    # elif ('?' in sql or '_' in sql and parameters == None):
-        # print("**[2] An error has occured.\n")
-        # print("!!QUERY:", sql)
-        
-        # if (parameters is not None):
-        #     print("\nPARAMETER(S):", parameters)
-
-        # return None
     
+    # Cursor, and get number of wildcards
     dbCursor = dbConn.cursor()
+    paramCount = sql.count('?') # I only use '?' for wildcards, not '_'
 
-    # print("Query:", sql)
-    # print("\nPARAMETER(S):", parameters)
-
-    
-    # print("Parameter is of type:", type(parameters))
-    # print("As a tuple: ", tuple(parameters))
     if (parameters is not None):
-        parameters = (parameters, parameters)
+
+        # parameters = (parameters, parameters)
+        if (paramCount == 0):
+            parameters = (None,)
+
+        elif (paramCount == 2): # only 1 function uses this (in this project)
+            parameters = (parameters, parameters)
+        
+        
+        # print("Param Count: ", paramCount)
+
+        # Dynamically add to the list of parameters; caused problems, so is unimplemented
+        # if paramCount == 0:
+        #     parameters = (''.join(parameters),)
+        #     parameters = (None,)
+        # else:
+
+        #     print("Preloop: The tuple is now: ", parameters)
+        #     for i in range(0, paramCount):
+        #         parameters = (''.join(parameters),)
+        #         print("The tuple is now: ", parameters)
+
+        # print("**The tuple is now: ", parameters)
+        # temp = tuple(''.join(each) for each in parameters)
+        # parameters = temp
     else:
         parameters = (None, None)
 
+    # Query the database
     result = dbCursor.execute(sql, parameters)
 
     row = result.fetchall()
