@@ -36,11 +36,11 @@ def commandDriver(userChoice, dbConn):
     # If the input is 1-5, execute the relevant processes
     if (userChoice == '1'):
         nameSearch = input("Enter lobbyist name (first or last, wildcards _ and % supported): ")
-        objecttier.get_lobbyists(dbConn, nameSearch)
+        LobbyistList = objecttier.get_lobbyists(dbConn, nameSearch)
 
     elif (userChoice == '2'):
         IDSearch = input("Enter Lobbyist ID: ")
-        objecttier.get_lobbyist_details(dbConn, IDSearch)
+        lobbyistDetailsObject = objecttier.get_lobbyist_details(dbConn, IDSearch)
 
     elif (userChoice == '3'):
         nVal = input("Enter the value of N: ")
@@ -58,9 +58,9 @@ def commandDriver(userChoice, dbConn):
         objecttier.get_top_N_lobbyists(dbConn, nVal, yearVal)
 
     elif (userChoice == '4'):
-        # stopsInLineAndDirection(dbConn)
-        print("Command #4 has not been implemented yet.\nExiting...\n")
-        exit(0)
+        newYear = input("Enter year: ")
+        IDtoModify = input("Enter the lobbyist ID: ")
+        lobbyistDetailsObject = objecttier.add_lobbyist_year(dbConn, IDtoModify, newYear)
 
     elif (userChoice == '5'):
         # stopsByColor_DirectionSorted(dbConn)
@@ -72,6 +72,12 @@ def commandDriver(userChoice, dbConn):
         # print("\nExiting...")
         exit(0)
     
+    elif (userChoice == '6'):
+        delYear = input("TEMP CMD - DELETE a Year: ")
+        IDtoModify = input("Enter the lobbyist ID: ")
+
+        objecttier.delLobbyYearTEMP(dbConn, IDtoModify, delYear)
+
     # A valid command must be entered to continue the program
     else:
         print("**Error, unknown command, try again...")

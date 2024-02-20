@@ -538,6 +538,7 @@ def get_lobbyist_details(dbConn, lobbyist_id):
          # Convert each element in the tuple to a string
          result = [str(value) for value in tempData]
 
+         # Data extraction (for clarity)
          Lobbyist_ID = result[0]
          Salutation = result[1]
          First_Name = result[2]
@@ -557,6 +558,7 @@ def get_lobbyist_details(dbConn, lobbyist_id):
          Employers = EmployersInfo
          TotalCompensation = compenstionInfo[0]
          
+         # Output
          print("  Full Name: " + First_Name, Middle_Initial, Last_Name)
          print("  Address: " + Address_1 + ", " + City + " , " + State_Initial, ZipCode,", " + Country)
          print("  Email: " + Email)
@@ -564,6 +566,7 @@ def get_lobbyist_details(dbConn, lobbyist_id):
          print("  Fax: " + Fax)
          print("  Years Registered:", end=' ')
    
+         # Split the years based on ',' for output
          Years_Registered = Years_Registered.split(',')
 
          for i in range(0, len(Years_Registered)):
@@ -606,12 +609,13 @@ def get_lobbyist_details(dbConn, lobbyist_id):
          return currLobbyist
       else:
          return [] # Return an empty list
-      
+   
+   # Handle any exceptions and return None
    except Exception as e:
       print("get_lobbyist_details failed:", e)
-      return []
+      return None
    
-   # End get_lobbyists()
+   # End get_lobbyist_details()
 
 
 
@@ -720,7 +724,45 @@ def get_top_N_lobbyists(dbConn, N, year):
 #          an internal error occurred).
 #
 def add_lobbyist_year(dbConn, lobbyist_id, year):
-   pass
+
+   validIDQuery = """
+      SELECT
+         LobbyistInfo.First_Name AS NameExists
+      FROM
+         LobbyistInfo
+      WHERE
+         LobbyistInfo.Lobbyist_ID = ?;
+   """
+
+   insertionQuery = """
+      INSERT INTO 
+         LobbyistYears (Lobbyist_ID, Year) VALUES ( ? , ? );
+   """
+
+   # Confirm the ID entered is actually valid
+   validID = datatier.select_n_rows(dbConn, validIDQuery, lobbyist_id)
+
+   if (validID == []):  # If an empty list is returned, no match is found
+      print("No lobbyist with that ID was found.\n")
+      return 0
+
+   try:
+
+      insertionResults = datatier.select_n_rows(dbConn, insertionQuery, [lobbyist_id, year])
+
+      if (insertionResults is not None):
+         print("\nResults:", insertionResults, "**")
+         dbConn.commit()
+         print("\nLobbyist successfully registered.\n")
+         return 1
+      else:
+         return 0
+
+
+   except Exception as e:
+      print("\nadd_lobbyist_year failed:", e)
+      return 0
+
 
 
 ##################################################################
@@ -739,4 +781,75 @@ def add_lobbyist_year(dbConn, lobbyist_id, year):
 #          an internal error occurred).
 #
 def set_salutation(dbConn, lobbyist_id, salutation):
+
+   validIDQuery = """
+      SELECT
+         LobbyistInfo.First_Name AS NameExists
+      FROM
+         LobbyistInfo
+      WHERE
+         LobbyistInfo.Lobbyist_ID = ?;
+   """
+
+   # Confirm the ID entered is actually valid
+   validID = datatier.select_n_rows(dbConn, validIDQuery, lobbyist_id)
+
+   if (validID == []):  # If an empty list is returned, no match is found
+      print("No lobbyist with that ID was found.\n")
+      return 0
+   
    pass
+
+
+# Temp Function that is used during testing; deletes a year/lobbyist entry
+# This is mainly so I can keep testing the add_year function without changing
+# the actual database too much.
+def delLobbyYearTEMP(dbConn, lobbyist_id, year):
+
+   # Todo
+   print('\033[91m' + '\033[1m' + "--------\nWarning: This Function MUST be removed before submission\n--------" + '\033[0m')
+   # For more info on that text, see:
+   # https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
+
+   validIDQuery = """
+      SELECT
+         LobbyistInfo.First_Name AS NameExists
+      FROM
+         LobbyistInfo
+      WHERE
+         LobbyistInfo.Lobbyist_ID = ?;
+   """
+
+   deletionQuery = """
+      DELETE FROM 
+         LobbyistYears
+      WHERE
+         LobbyistYears.Lobbyist_ID = ?
+         AND
+         LobbyistYears.Year = ? ;
+   """
+
+   # Confirm the ID entered is actually valid
+   validID = datatier.select_n_rows(dbConn, validIDQuery, lobbyist_id)
+
+   if (validID == []):  # If an empty list is returned, no match is found
+      print("No lobbyist with that ID was found.\n")
+      return 0
+
+   try:
+
+      deletionResults = datatier.select_n_rows(dbConn, deletionQuery, [lobbyist_id, year])
+
+      if (deletionResults is not None):
+         print("\nResults:", deletionResults, "**")
+         dbConn.commit()
+         print("\nLobbyist successfully unregistered.\n")
+         return 1
+      else:
+         return 0
+
+
+   except Exception as e:
+      print("\ndelLobbyYearTEMP failed:", e)
+      print()
+      return 0
