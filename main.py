@@ -43,9 +43,19 @@ def commandDriver(userChoice, dbConn):
         objecttier.get_lobbyist_details(dbConn, IDSearch)
 
     elif (userChoice == '3'):
-        # weekdayRidershipByName(dbConn)
-        print("Command #3 has not been implemented yet.\nExiting...\n")
-        exit(0)
+        nVal = input("Enter the value of N: ")
+        
+        if (nVal.isdigit()):
+            nVal = int(nVal)
+            if (nVal <= 0):
+                print("Please enter a positive value for N...\n")
+                return []
+        else:
+            print("Please enter a positive value for N...\n")
+            return []
+
+        yearVal = input("Enter the year: ")
+        objecttier.get_top_N_lobbyists(dbConn, nVal, yearVal)
 
     elif (userChoice == '4'):
         # stopsInLineAndDirection(dbConn)

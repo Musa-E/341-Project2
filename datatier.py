@@ -5,6 +5,7 @@
 #
 # Original author: Prof. Joe Hummel, Ellen Kidane
 #
+# Modified By: Musa Elqaq [for CS341, Spring 2024]
 import sqlite3
 
 
@@ -25,38 +26,41 @@ import sqlite3
 #
 def select_one_row(dbConn, sql, parameters = None):
 
-    # Invalid Database Connection
-    if (dbConn is None):
-        print()
-        return None
+    rows = None # Holds return vals
 
-    # No query is provided
-    # elif (sql is None or sql == ""):
-    #     print()
-    #     return None
+    # Try to connect and do stuff
+    try:
+        dbCursor = dbConn.cursor()
+        result = None
 
-    # Wildcards are used, but no values to fill in for them are provided
-    # elif ('?' in sql or '_' in sql and parameters == None):
-    #     print()
-    #     return None
+        # If there are parameters, use them in .execute
+        if (parameters is None):
+            result = dbCursor.execute(sql) # Query database
+        
+        # Else, only use sql query
+        else:
+            result = dbCursor.execute(sql, parameters)
+        
+        rows = result.fetchone() # Store data
     
-    dbCursor = dbConn.cursor()
-    result = None
+    # Catch Exceptions & return None
+    except Exception as e:
+        print("select_one_row failed:", e)
+        return None
+    
+    # No matter what, close the cursor
+    finally:
+        dbCursor.close()
 
-    if (parameters is None):
-        result = dbCursor.execute(sql)
-    else:
-        result = dbCursor.execute(sql, parameters)
 
-    # Get the result
-    if (result is not None):
-
-        # Return only the first row
-        return result.fetchone()
+    # Get the result, if none, returns ()
+    if (rows is not None):
+        return rows # Return only the first row
     else:
         return ()
 
     # End select_one_row()
+
 
 
 ##################################################################
@@ -77,54 +81,34 @@ def select_one_row(dbConn, sql, parameters = None):
 #
 def select_n_rows(dbConn, sql, parameters = None):
     
-    # Invalid Database Connection
-    if (dbConn is None):
-        print()
+    row = None  # init the data holder
+
+    try:
+        # Cursor, and get number of wildcards
+        dbCursor = dbConn.cursor()
+
+        # If there are parameters, use them in the .execute
+        if (parameters is not None):
+            
+            result = dbCursor.execute(sql, parameters) # Query the database
+
+        # Else, only use the sql query
+        else:
+            result = dbCursor.execute(sql)
+
+        row = result.fetchall() # Store the data
+
+    # Catch Exceptions & return None
+    except Exception as e:
+        print("select_n_rows failed:", e)
         return None
 
-    # No query is provided
-    elif (sql is None or sql == ""):
-        print("**[1] A SQL error has occured.\n")
-        return None
-    
-    # Cursor, and get number of wildcards
-    dbCursor = dbConn.cursor()
-    paramCount = sql.count('?') # I only use '?' for wildcards, not '_'
+    # No matter what, close the cursor
+    finally:
+        dbCursor.close()
 
-    if (parameters is not None):
 
-        # parameters = (parameters, parameters)
-        if (paramCount == 0):
-            parameters = (None,)
-
-        elif (paramCount == 2): # only 1 function uses this (in this project)
-            parameters = (parameters, parameters)
-        
-        
-        # print("Param Count: ", paramCount)
-
-        # Dynamically add to the list of parameters; caused problems, so is unimplemented
-        # if paramCount == 0:
-        #     parameters = (''.join(parameters),)
-        #     parameters = (None,)
-        # else:
-
-        #     print("Preloop: The tuple is now: ", parameters)
-        #     for i in range(0, paramCount):
-        #         parameters = (''.join(parameters),)
-        #         print("The tuple is now: ", parameters)
-
-        # print("**The tuple is now: ", parameters)
-        # temp = tuple(''.join(each) for each in parameters)
-        # parameters = temp
-    else:
-        parameters = (None, None)
-
-    # Query the database
-    result = dbCursor.execute(sql, parameters)
-
-    row = result.fetchall()
-    # Get the result
+    # Get the result, if no results, return []
     if (row is not None):
 
         # Return all rows
@@ -133,6 +117,7 @@ def select_n_rows(dbConn, sql, parameters = None):
         return []
     
     # End select_n_rows()
+
 
 
 ##################################################################
@@ -156,39 +141,35 @@ def select_n_rows(dbConn, sql, parameters = None):
 #
 def perform_action(dbConn, sql, parameters = None):
 
-    # Invalid Database Connection
-    if (dbConn is None):
-        print()
-        return -1
+    # Try to connect to database & perform an action
+    try:
 
-    # No query is provided
-    elif (sql is None or sql == ""):
-        print()
-        return -1
+        # Create a cursor & init data holder
+        dbCursor = dbConn.cursor()
+        result = None
 
-    # Wildcards are used, but no values to fill in for them are provided
-    elif ('?' in sql or '_' in sql and parameters == None):
-        print()
+        # If there are parameters, use them in the .execute
+        if (parameters is not None):
+            # Query the database
+            result = dbCursor.execute(sql, parameters)
+        
+        # If no parameters, only use the sql query
+        else:
+            result = dbCursor.execute(sql)
+
+        # Commit the changes to the database
+        dbConn.commit()
+    
+    # Handle any errors & return -1
+    except Exception as e:
+        print("perform_action failed:", e)
         return -1
     
-    dbCursor = dbConn.cursor()
-    result = None
-
-    result = dbCursor.execute(sql, parameters);
-
-    # Commit the changes to the database
-    dbConn.commit()
+    # No matter what, close the cursor
+    finally:
+        dbCursor.close()
 
     # Return the number of rows modified
     return result.rowcount
 
-    # Get the result
-    # if (result is not None):
-
-    #     # Return only the first row
-    #     return result.fetchone()
-    # else:
-    #     return ()
-
     # End perform_action()
-    pass
