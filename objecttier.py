@@ -559,7 +559,7 @@ def get_lobbyist_details(dbConn, lobbyist_id):
          TotalCompensation = compenstionInfo[0]
          
          # Output
-         print("  Full Name: " + First_Name, Middle_Initial, Last_Name)
+         print("  Full Name: " + Salutation, First_Name, Middle_Initial, Last_Name)
          print("  Address: " + Address_1 + ", " + City + " , " + State_Initial, ZipCode,", " + Country)
          print("  Email: " + Email)
          print("  Phone: " + Phone)
@@ -791,11 +791,42 @@ def set_salutation(dbConn, lobbyist_id, salutation):
          LobbyistInfo.Lobbyist_ID = ?;
    """
 
-   # Confirm the ID entered is actually valid
-   validID = datatier.select_n_rows(dbConn, validIDQuery, lobbyist_id)
+   updateSalutationQuery = """
+      UPDATE 
+         LobbyistInfo
+      SET 
+         Salutation = ?
+      WHERE 
+         LobbyistInfo.Lobbyist_ID = ? ;
+   """
 
-   if (validID == []):  # If an empty list is returned, no match is found
-      print("No lobbyist with that ID was found.\n")
+   try:
+      # Confirm the ID entered is actually valid
+      validID = datatier.select_n_rows(dbConn, validIDQuery, lobbyist_id)
+
+      if (validID == []):  # If an empty list is returned, no match is found
+         print("No lobbyist with that ID was found.\n")
+         return 0
+      
+      # Update the database with the new salutation
+      salutationUpdateResults = datatier.select_n_rows(dbConn, updateSalutationQuery, [salutation, lobbyist_id])
+
+      if (salutationUpdateResults is not None):
+         print("\n  **Results:", salutationUpdateResults, " **.\n")
+         
+         if (len(salutationUpdateResults) == 0):
+            print("\nEmpty results??")
+         else:
+            dbConn.commit()
+            print("\nSalutation successfully set.")
+      
+         print()
+         return 1
+      else:
+         return 0
+      
+   except Exception as e:
+      print("set_salutation failed:", e)
       return 0
    
    pass

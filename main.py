@@ -63,9 +63,9 @@ def commandDriver(userChoice, dbConn):
         lobbyistDetailsObject = objecttier.add_lobbyist_year(dbConn, IDtoModify, newYear)
 
     elif (userChoice == '5'):
-        # stopsByColor_DirectionSorted(dbConn)
-        print("Command #5 has not been implemented yet.\nExiting...\n")
-        exit(0)
+        IDtoModify = input("Enter the lobbyist ID: ")
+        newSalutation = input("Enter the salutation: ")
+        objecttier.set_salutation(dbConn, IDtoModify, newSalutation)
 
     # If the user wants to exit
     elif (userChoice == 'x'):
