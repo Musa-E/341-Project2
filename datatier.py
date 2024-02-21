@@ -105,7 +105,8 @@ def select_n_rows(dbConn, sql, parameters = None):
 
     # No matter what, close the cursor
     finally:
-        dbCursor.close()
+        if dbCursor is not None:
+            dbCursor.close()
 
 
     # Get the result, if no results, return []

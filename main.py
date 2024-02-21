@@ -72,9 +72,13 @@ def commandDriver(userChoice, dbConn):
         # print("\nExiting...")
         exit(0)
     
+    # Temporary functionality that allows a user to delete a year for a lobbyist
+    # This is offered as an "undo-button" for command 4, and will be commented out,
+    # but remain in the file.  If you want to use it, uncomment this section and
+    # the relevant function in objecttier.py (used below), plug-and-play style.
     elif (userChoice == '6'):
-        delYear = input("TEMP CMD - DELETE a Year: ")
-        IDtoModify = input("Enter the lobbyist ID: ")
+        delYear = input('\033[91m' + '\033[1m' + "TEMP CMD - DELETE a Year: " + '\033[0m')
+        IDtoModify = input('\033[91m' + '\033[1m' + "Enter the lobbyist ID: " + '\033[0m')
 
         objecttier.delLobbyYearTEMP(dbConn, IDtoModify, delYear)
 

@@ -725,6 +725,7 @@ def get_top_N_lobbyists(dbConn, N, year):
 #
 def add_lobbyist_year(dbConn, lobbyist_id, year):
 
+   # Confirms that the entered lobbyist_id is in the database
    validIDQuery = """
       SELECT
          LobbyistInfo.First_Name AS NameExists
@@ -734,10 +735,15 @@ def add_lobbyist_year(dbConn, lobbyist_id, year):
          LobbyistInfo.Lobbyist_ID = ?;
    """
 
+   # Actually updates the database
    insertionQuery = """
       INSERT INTO 
          LobbyistYears (Lobbyist_ID, Year) VALUES ( ? , ? );
    """
+
+   # Conversion for query
+   idNum = lobbyist_id
+   lobbyist_id = (''.join(lobbyist_id),)
 
    # Confirm the ID entered is actually valid
    validID = datatier.select_n_rows(dbConn, validIDQuery, lobbyist_id)
@@ -748,20 +754,25 @@ def add_lobbyist_year(dbConn, lobbyist_id, year):
 
    try:
 
+      # Revert back to original type for the following query
+      lobbyist_id = idNum
       insertionResults = datatier.select_n_rows(dbConn, insertionQuery, [lobbyist_id, year])
 
-      if (insertionResults is not None):
-         print("\nResults:", insertionResults, "**")
+      if (len(insertionResults) == 0):  # If successfully added, commit to database
          dbConn.commit()
          print("\nLobbyist successfully registered.\n")
          return 1
       else:
+         # print('\033[91m' + '\033[1m' + "FAILED" + '\033[0m')
+         print("\nadd_lobbyist_year failed")
          return 0
 
-
+   # Catch any exceptions and return 0
    except Exception as e:
       print("\nadd_lobbyist_year failed:", e)
       return 0
+
+   # End add_lobbyist_year()
 
 
 
@@ -782,6 +793,7 @@ def add_lobbyist_year(dbConn, lobbyist_id, year):
 #
 def set_salutation(dbConn, lobbyist_id, salutation):
 
+   # Confirms that the entered lobbyist_id is in the database
    validIDQuery = """
       SELECT
          LobbyistInfo.First_Name AS NameExists
@@ -791,6 +803,7 @@ def set_salutation(dbConn, lobbyist_id, salutation):
          LobbyistInfo.Lobbyist_ID = ?;
    """
 
+   # Actually updates the database
    updateSalutationQuery = """
       UPDATE 
          LobbyistInfo
@@ -801,6 +814,10 @@ def set_salutation(dbConn, lobbyist_id, salutation):
    """
 
    try:
+
+      idNum = lobbyist_id
+      lobbyist_id = (''.join(lobbyist_id),)
+
       # Confirm the ID entered is actually valid
       validID = datatier.select_n_rows(dbConn, validIDQuery, lobbyist_id)
 
@@ -808,21 +825,18 @@ def set_salutation(dbConn, lobbyist_id, salutation):
          print("No lobbyist with that ID was found.\n")
          return 0
       
-      # Update the database with the new salutation
+      # Revert lobbyist_id and update the database with the new salutation
+      lobbyist_id = idNum
       salutationUpdateResults = datatier.select_n_rows(dbConn, updateSalutationQuery, [salutation, lobbyist_id])
 
-      if (salutationUpdateResults is not None):
-         print("\n  **Results:", salutationUpdateResults, " **.\n")
-         
-         if (len(salutationUpdateResults) == 0):
-            print("\nEmpty results??")
-         else:
-            dbConn.commit()
-            print("\nSalutation successfully set.")
-      
-         print()
+      if (len(salutationUpdateResults) == 0): # If successfully added, commit to database
+
+         dbConn.commit()
+         print("\nSalutation successfully set.\n")
+
          return 1
       else:
+         print("set_salutation failed")
          return 0
       
    except Exception as e:
@@ -830,6 +844,7 @@ def set_salutation(dbConn, lobbyist_id, salutation):
       return 0
    
    pass
+
 
 
 # Temp Function that is used during testing; deletes a year/lobbyist entry
@@ -860,6 +875,9 @@ def delLobbyYearTEMP(dbConn, lobbyist_id, year):
          LobbyistYears.Year = ? ;
    """
 
+   idNum = lobbyist_id
+   lobbyist_id = (''.join(lobbyist_id),)
+
    # Confirm the ID entered is actually valid
    validID = datatier.select_n_rows(dbConn, validIDQuery, lobbyist_id)
 
@@ -869,12 +887,13 @@ def delLobbyYearTEMP(dbConn, lobbyist_id, year):
 
    try:
 
+      lobbyist_id = idNum
       deletionResults = datatier.select_n_rows(dbConn, deletionQuery, [lobbyist_id, year])
 
-      if (deletionResults is not None):
-         print("\nResults:", deletionResults, "**")
+      if (len(deletionResults) == 0): # If successfully added, commit to database
+         # print("\nResults:", deletionResults, "**")
          dbConn.commit()
-         print("\nLobbyist successfully unregistered.\n")
+         print("\n" + '\033[91m' + '\033[1m' + "Lobbyist successfully unregistered.\n" + '\033[0m')
          return 1
       else:
          return 0
