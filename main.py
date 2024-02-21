@@ -22,11 +22,81 @@ def print_stats(dbConn):
         return None
 
     # Call the object tier's functions
-    print("  Number of Lobbyists:", objecttier.num_lobbyists(dbConn))
-    print("  Number of Employers:", objecttier.num_employers(dbConn))
-    print("  Number of Clients:", objecttier.num_clients(dbConn))
+    print(f" Number of Lobbyists: {objecttier.num_lobbyists(dbConn):,}")
+    print(f" Number of Employers: {objecttier.num_employers(dbConn):,}")
+    print(f" Number of Clients: {objecttier.num_clients(dbConn):,}")
 
     # End print_stats()
+
+
+
+def lobbyistSearch(dbConn):
+
+    # Get input + object based on said input
+    nameSearch = input("Enter lobbyist name (first or last, wildcards _ and % supported): ")
+    
+    return objecttier.get_lobbyists(dbConn, nameSearch)
+    # End lobbyistSearch()
+
+
+
+def lobbiystLookup(dbConn):
+
+    # Get input + object based on said input
+    IDSearch = input("Enter Lobbyist ID: ")
+
+    return objecttier.get_lobbyist_details(dbConn, IDSearch)
+    # End lobbiystLookup()
+
+
+
+def topLobbyists(dbConn):
+
+    # Get input
+    nVal = input("Enter the value of N: ")
+    
+    # If N val is a digit, check if it's a positive value
+    if (nVal.isdigit()):
+
+        # Convert and confirm a valid N value
+        nVal = int(nVal)
+        if (nVal <= 0):
+            print("Please enter a positive value for N...\n")
+            return []
+    
+    # A dgit wasn't entered, return an empty list
+    else:
+        print("Please enter a positive value for N...\n")
+        return []
+
+    # Ask for a year + get an object
+    yearVal = input("Enter the year: ")
+
+    return objecttier.get_top_N_lobbyists(dbConn, nVal, yearVal)
+
+    # End topLobbyists()
+
+
+
+def addLobbyistYear(dbConn):
+
+    newYear = input("Enter year: ")
+    IDtoModify = input("Enter the lobbyist ID: ")
+   
+    return objecttier.add_lobbyist_year(dbConn, IDtoModify, newYear)
+
+    # End addLobbyistYear()
+
+
+
+def modifySalutation(dbConn):
+
+    IDtoModify = input("Enter the lobbyist ID: ")
+    newSalutation = input("Enter the salutation: ")
+    
+    return objecttier.set_salutation(dbConn, IDtoModify, newSalutation)
+
+    # End modifySalutation()
 
 
 
@@ -35,41 +105,23 @@ def commandDriver(userChoice, dbConn):
 
     # If the input is 1-5, execute the relevant processes
     if (userChoice == '1'):
-        nameSearch = input("Enter lobbyist name (first or last, wildcards _ and % supported): ")
-        LobbyistList = objecttier.get_lobbyists(dbConn, nameSearch)
-
+        lobbyistSearch(dbConn)
+        
     elif (userChoice == '2'):
-        IDSearch = input("Enter Lobbyist ID: ")
-        lobbyistDetailsObject = objecttier.get_lobbyist_details(dbConn, IDSearch)
+        lobbiystLookup(dbConn)
 
     elif (userChoice == '3'):
-        nVal = input("Enter the value of N: ")
+        topLobbyists(dbConn)
         
-        if (nVal.isdigit()):
-            nVal = int(nVal)
-            if (nVal <= 0):
-                print("Please enter a positive value for N...\n")
-                return []
-        else:
-            print("Please enter a positive value for N...\n")
-            return []
-
-        yearVal = input("Enter the year: ")
-        objecttier.get_top_N_lobbyists(dbConn, nVal, yearVal)
-
     elif (userChoice == '4'):
-        newYear = input("Enter year: ")
-        IDtoModify = input("Enter the lobbyist ID: ")
-        lobbyistDetailsObject = objecttier.add_lobbyist_year(dbConn, IDtoModify, newYear)
+        addLobbyistYear(dbConn)
 
     elif (userChoice == '5'):
-        IDtoModify = input("Enter the lobbyist ID: ")
-        newSalutation = input("Enter the salutation: ")
-        objecttier.set_salutation(dbConn, IDtoModify, newSalutation)
+        modifySalutation(dbConn)
 
     # If the user wants to exit
     elif (userChoice == 'x'):
-        # print("\nExiting...")
+        print()
         exit(0)
     
     # Temporary functionality that allows a user to delete a year for a lobbyist
@@ -102,7 +154,7 @@ def main():
     if (dbConn != None):
         print_stats(dbConn);
 
-    print()
+    # print()
     userChoice = input("Please enter a command (1-5, x to exit): ")
     commandDriver(userChoice, dbConn)
 
