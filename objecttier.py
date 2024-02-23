@@ -6,6 +6,8 @@
 #
 # Original author: Ellen Kidane
 #
+# Modified By: Musa Elqaq [for CS341, Spring 2024]
+#
 import datatier
 
 
@@ -173,6 +175,8 @@ class LobbyistDetails:
    def Total_Compensation(self):
       return self._Total_Compensation
 
+   # End LobbyistDetails class
+
 
 
 ##################################################################
@@ -222,7 +226,7 @@ class LobbyistClients:
    
    @property
    def Clients(self):
-      return self._Clients
+      return self._Clients # (List)
    
    # End LobbyistClients class
 
@@ -237,6 +241,7 @@ class LobbyistClients:
 #
 def num_lobbyists(dbConn):
 
+   # Query for the database
    query = """
       SELECT
          COUNT(DISTINCT LobbyistAndEmployer.Lobbyist_ID) As Lobbyists
@@ -247,11 +252,15 @@ def num_lobbyists(dbConn):
    # Search with the above query
    result = datatier.select_one_row(dbConn, query)
 
+   # If valid result, return it.  Else, return -1
    if (result is not None):
 
       return result[0]
    else:
       return -1
+   
+   # End num_lobbyists
+
 
 
 ##################################################################
@@ -263,6 +272,7 @@ def num_lobbyists(dbConn):
 #
 def num_employers(dbConn):
    
+   # Query for the database
    query = """
       SELECT
          COUNT(DISTINCT EmployerInfo.Employer_ID) AS Employers
@@ -275,11 +285,16 @@ def num_employers(dbConn):
    # Search with the above query
    result = datatier.select_one_row(dbConn, query)
 
+   # If valid result, return it.  Else, return -1
    if (result is not None):
 
       return result[0]
    else:
       return -1
+   
+   # End num_employers()
+
+
 
 ##################################################################
 # 
@@ -290,6 +305,7 @@ def num_employers(dbConn):
 #
 def num_clients(dbConn):
    
+   # Query for the database
    query = """
       SELECT
          COUNT(DISTINCT ClientInfo.Client_ID) As Clients
@@ -300,11 +316,16 @@ def num_clients(dbConn):
    # Search with the above query
    result = datatier.select_one_row(dbConn, query)
 
+   # If valid result, return it.  Else, return -1
    if (result is not None):
 
       return result[0]
    else:
       return -1
+   
+   # End num_clients()
+
+
 
 ##################################################################
 #
@@ -320,7 +341,8 @@ def num_clients(dbConn):
 #          which case an error msg is already output).
 #
 def get_lobbyists(dbConn, pattern):
-   
+
+   # Query for the database 
    query = """
       SELECT DISTINCT
          LobbyistInfo.Lobbyist_ID As Lobbyists,
@@ -336,13 +358,16 @@ def get_lobbyists(dbConn, pattern):
          Lobbyists ASC;
    """
 
-   pattern = ''.join(pattern)
+   pattern = ''.join(pattern) # Compatability
+
    # Search with the above query
    result = datatier.select_n_rows(dbConn, query, [pattern, pattern])
 
    if (result is not None):
 
+      # Holds the object(s) to be returned
       Lobbyists = []
+
       # Iterate through results and store info in object(s)
       for row in result:
          Lobbyist_ID = row[0]
@@ -353,7 +378,6 @@ def get_lobbyists(dbConn, pattern):
          # Add a new Lobbyist object to the list & Output info
          Lobbyists.append(Lobbyist(Lobbyist_ID, First_Name, Last_Name, Phone))
 
-      # print() # Formatting
       return Lobbyists
    else:
       return [] # Return an empty list
@@ -377,7 +401,7 @@ def get_lobbyists(dbConn, pattern):
 #
 def get_lobbyist_details(dbConn, lobbyist_id):
 
-   # Query - Compensation Amount is incorrect (Duplicates from the JOIN statements?)
+   # Queries for the database
    query = """
       SELECT
          LobbyistInfo.Lobbyist_ID,
@@ -492,24 +516,22 @@ def get_lobbyist_details(dbConn, lobbyist_id):
          Compensation.Lobbyist_ID = ?;
    """
 
+   # Attempt the above queries
    try:
-      idNum = lobbyist_id
-      # lobbyist_id = (''.join(lobbyist_id),)
-      # Search with the above query 
 
       # Confirm the ID entered is actually valid
       validID = datatier.select_n_rows(dbConn, validIDQuery, [lobbyist_id])
       
       if (validID == []):  # If an empty list is returned, no match is found
-         # print('\033[91m' + '\033[1m' + "No lobbyist with that ID was found.\n" + '\033[0m')
          return None
 
+      # Query the database with the relevant queries defiend above (& parameter(s))
       lobbyistInfo = datatier.select_n_rows(dbConn, lobbyistInfoQuery, [lobbyist_id])
       RegisteredYearsInfo = datatier.select_one_row(dbConn, RegisteredYearsQuery, [lobbyist_id])
       EmployersInfo = datatier.select_n_rows(dbConn, EmployersQuery, [lobbyist_id])
       compenstionInfo = datatier.select_one_row(dbConn, compenstionQuery, [lobbyist_id])
 
-      # result = datatier.select_n_rows(dbConn, query, lobbyist_id)
+      # Take the info on the lobbyist first; can't get anything else if that doesn't exist
       result = lobbyistInfo
 
       if (result is not None):
@@ -594,6 +616,7 @@ def get_lobbyist_details(dbConn, lobbyist_id):
 #
 def get_top_N_lobbyists(dbConn, N, year):
 
+   # SQL Query
    lobbyistInfoQuery = """
       SELECT DISTINCT
          LobbyistInfo.Lobbyist_ID AS ID,
@@ -601,7 +624,7 @@ def get_top_N_lobbyists(dbConn, N, year):
          LobbyistInfo.Last_Name AS LastName,
          SUM(Compensation.Compensation_Amount) AS Compensation,
          LobbyistInfo.Phone AS PhoneNum,
-         GROUP_CONCAT(ClientInfo.Client_Name, '+') AS ClientList
+         GROUP_CONCAT(ClientInfo.Client_ID, '+') AS ClientIDList
       FROM
          Compensation
       JOIN
@@ -618,19 +641,15 @@ def get_top_N_lobbyists(dbConn, N, year):
          ?;
    """
 
-   try: # Needed?
-      # year = (''.join(year),)
-      # Search with the above query 
+   try: 
 
       # Get "N" number of topLobbyists for a given "year"
       topLobbyists = datatier.select_n_rows(dbConn, lobbyistInfoQuery, [year, N])
-    # topLobbyistClients = datatier.select_n_rows(dbConn, lobbyistClientsQuery, [year, N])
 
+   # Catch problems and return an empty list
    except Exception as e: # Needed?
       # print("get_top_N_lobbyists failed:", e)
       return []
-   
-
 
    # No results; return an empty list
    if (topLobbyists is None):
@@ -639,13 +658,18 @@ def get_top_N_lobbyists(dbConn, N, year):
 
    else:
 
+      # Holds all Lobbyists to be returned
       Lobbyists = []
+
+
       # Invalid year returned nothing from database; return empty list
       if (len(topLobbyists) == 0):
          return []
 
       # Iterate through each result (aka lobbyist)
       for i in range(0, N):
+
+         # Assignments for each row, per lobbyist
          id = topLobbyists[i][0]
          firstName = topLobbyists[i][1]
          lastName = topLobbyists[i][2]
@@ -662,17 +686,43 @@ def get_top_N_lobbyists(dbConn, N, year):
          tempClients = list(set(tempClients))
          tempClients = sorted(tempClients)
 
-         # Update clients with correctly formatted data
-         clients = tempClients
+         # Query to get a client's name, given their ID
+         clientQuery = """
+            SELECT DISTINCT
+               ClientInfo.Client_Name AS Name
+            FROM
+               ClientInfo
+            WHERE
+               ClientInfo.Client_ID = ?
+         """
 
+         # Gets the name for each client ID and adds it to the clientNamesList, and sorts it.
+         # (Not very efficient, but I couldn't get duplicate names, different ID's, thing to work without this)
+         clientNamesList = []
+         for client in tempClients:
+            clientName = datatier.select_one_row(dbConn, clientQuery, [client])
+
+            # Ensure an actual value is returned from query and added to list
+            if (clientName is not None):
+               clientNamesList.append(clientName[0])
+
+            clientNamesList = sorted(clientNamesList) # Sort the list
+         
+
+         # Update clients with correctly formatted data
+         clients = clientNamesList
+
+         # In the event something fails, switch the clients list to an empty list (for compatability)
          if (clients is None):
             clients = []
          
+         # Add to the list of objects to be returned
          Lobbyists.append(LobbyistClients(id, firstName, lastName, phoneNum, compensation, clients))
 
       # Return a list of "lobbyistClients" objects
       return Lobbyists
-
+   
+   # End get_top_N_lobbyists()
 
 
 
@@ -715,7 +765,6 @@ def add_lobbyist_year(dbConn, lobbyist_id, year):
       validID = datatier.select_n_rows(dbConn, validIDQuery, lobbyist_id)
 
       if (validID == []):  # If no match is found, 0 is returned
-         # print('\033[91m' + '\033[1m' + "No lobbyist with that ID was found.\n" + '\033[0m')
          return 0
 
       # Revert back to original type for the following query
@@ -726,12 +775,11 @@ def add_lobbyist_year(dbConn, lobbyist_id, year):
          dbConn.commit()
          return 1
       else:
-         # print('\033[91m' + '\033[1m' + "FAILED" + '\033[0m')
          return 0
 
    # Catch any exceptions and return 0
    except Exception as e:
-      print("\nadd_lobbyist_year failed:", e)
+      # print("\nadd_lobbyist_year failed:", e)
       return 0
 
    # End add_lobbyist_year()
@@ -777,6 +825,7 @@ def set_salutation(dbConn, lobbyist_id, salutation):
 
    try:
 
+      # Compatability
       idNum = lobbyist_id
       lobbyist_id = (''.join(lobbyist_id),)
 
@@ -800,7 +849,7 @@ def set_salutation(dbConn, lobbyist_id, salutation):
          return 0
       
    except Exception as e:
-      print("set_salutation failed:", e)
+      # print("set_salutation failed:", e)
       return 0
    
    # End set_salutation()
@@ -809,57 +858,63 @@ def set_salutation(dbConn, lobbyist_id, salutation):
 
 # Temp Function that is used during testing; deletes a year/lobbyist entry
 # This is mainly so I can keep testing the add_year function without changing
-# the actual database too much.
-def delLobbyYearTEMP(dbConn, lobbyist_id, year):
+# the actual database too much.  If you want to implement it, all you need to
+# do is uncomment this section and provide a lobbyist_id and year.
+# def delLobbyYearTEMP(dbConn, lobbyist_id, year):
 
-   # Todo
-   print('\033[91m' + '\033[1m' + "--------\nWarning: This Function MUST be removed before submission\n--------" + '\033[0m')
-   # For more info on that text, see:
-   # https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
+#    # Warns the user that this is a temporary function, and is not available in the official version.
+#    print('\033[91m' + '\033[1m' + "--------\nWarning: This Function MUST be removed before submission\n--------" + '\033[0m')
+#    # For more info on the above text/char combos, see:
+#    # https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
 
-   validIDQuery = """
-      SELECT
-         LobbyistInfo.First_Name AS NameExists
-      FROM
-         LobbyistInfo
-      WHERE
-         LobbyistInfo.Lobbyist_ID = ?;
-   """
+#    # Verify ID
+#    validIDQuery = """
+#       SELECT
+#          LobbyistInfo.First_Name AS NameExists
+#       FROM
+#          LobbyistInfo
+#       WHERE
+#          LobbyistInfo.Lobbyist_ID = ?;
+#    """
 
-   deletionQuery = """
-      DELETE FROM 
-         LobbyistYears
-      WHERE
-         LobbyistYears.Lobbyist_ID = ?
-         AND
-         LobbyistYears.Year = ? ;
-   """
+#    # Delete the year, given the proper parameters
+#    deletionQuery = """
+#       DELETE FROM 
+#          LobbyistYears
+#       WHERE
+#          LobbyistYears.Lobbyist_ID = ?
+#          AND
+#          LobbyistYears.Year = ? ;
+#    """
 
-   idNum = lobbyist_id
-   lobbyist_id = (''.join(lobbyist_id),)
+#    # Compatability
+#    idNum = lobbyist_id
+#    lobbyist_id = (''.join(lobbyist_id),)
 
-   # Confirm the ID entered is actually valid
-   validID = datatier.select_n_rows(dbConn, validIDQuery, lobbyist_id)
+#    # Confirm the ID entered is actually valid
+#    validID = datatier.select_n_rows(dbConn, validIDQuery, lobbyist_id)
 
-   if (validID == []):  # If an empty list is returned, no match is found
-      print('\033[91m' + '\033[1m' + "No lobbyist with that ID was found.\n" + '\033[0m')
-      return 0
+#    if (validID == []):  # If an empty list is returned, no match is found
+#       print('\033[91m' + '\033[1m' + "No lobbyist with that ID was found.\n" + '\033[0m')
+#       return 0
 
-   try:
+#    try:
 
-      lobbyist_id = idNum
-      deletionResults = datatier.select_n_rows(dbConn, deletionQuery, [lobbyist_id, year])
+#       # Conversion + query the database
+#       lobbyist_id = idNum
+#       deletionResults = datatier.select_n_rows(dbConn, deletionQuery, [lobbyist_id, year])
 
-      if (len(deletionResults) == 0): # If successfully added, commit to database
-         # print("\nResults:", deletionResults, "**")
-         dbConn.commit()
-         print("\n" + '\033[91m' + '\033[1m' + "Lobbyist successfully unregistered.\n" + '\033[0m')
-         return 1
-      else:
-         return 0
+#       if (len(deletionResults) == 0): # If successfully added, commit to database
+#          dbConn.commit()
+#          print("\n" + '\033[91m' + '\033[1m' + "Lobbyist successfully unregistered.\n" + '\033[0m')
+#          return 1
+#       else:
+#          return 0
 
-
-   except Exception as e:
-      print("\ndelLobbyYearTEMP failed:", e)
-      print()
-      return 0
+#    # Catch exceptions and return 0
+#    except Exception as e:
+#       print("\ndelLobbyYearTEMP failed:", e)
+#       print() # Formatting
+#       return 0
+   
+#    # End delLobbyYearTEMP()
