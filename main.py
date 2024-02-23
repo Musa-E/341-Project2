@@ -35,7 +35,19 @@ def lobbyistSearch(dbConn):
     # Get input + object based on said input
     nameSearch = input("Enter lobbyist name (first or last, wildcards _ and % supported): ")
     
-    return objecttier.get_lobbyists(dbConn, nameSearch)
+    lobbyistList = objecttier.get_lobbyists(dbConn, nameSearch)
+
+    # If there are more than 100 matches, display error message and prompt user to narrow search
+    if (len(lobbyistList) > 100):
+        print("There are too many lobbyists to display, please narrow your search and try again...\n")
+        return
+
+    # Loop through each lobbyist, even if 0 there's shouldn't be a problem
+    for lobbyist in lobbyistList:
+        print(lobbyist.Lobbyist_ID, ": " + lobbyist.First_Name, lobbyist.Last_Name + " Phone:", lobbyist.Phone)
+
+    print() # Formatting
+
     # End lobbyistSearch()
 
 
@@ -45,7 +57,32 @@ def lobbiystLookup(dbConn):
     # Get input + object based on said input
     IDSearch = input("Enter Lobbyist ID: ")
 
-    return objecttier.get_lobbyist_details(dbConn, IDSearch)
+    result = objecttier.get_lobbyist_details(dbConn, IDSearch)
+
+    if (result is not None):
+
+        print(result.Lobbyist_ID, ":")
+
+        # Output
+        print("  Full Name: " + result.Salutation, result.First_Name, result.Middle_Initial, result.Last_Name)
+        print("  Address: " + result.Address_1 + ", " + result.City + " , " + result.State_Initial, result.Zip_Code,", " + result.Country)
+        print("  Email: " + result.Email)
+        print("  Phone: " + result.Phone)
+        print("  Fax: " + result.Fax)
+        print("  Years Registered:", end=' ')
+
+        # Display all years the lobbyist is registered
+        for i in range(0, len(result.Years_Registered)):
+            print(result.Years_Registered[i], end=', ')
+
+        # Display each employer
+        print("\n  Employers:", end=' ')
+        for i in range(0, len(result.Employers)):
+            print(f"{result.Employers[i]}", end=", ")
+
+        print(f"\n  Total Compensation: ${result.Total_Compensation:,.2f}")
+        print() # Formatting
+    
     # End lobbiystLookup()
 
 
@@ -72,7 +109,33 @@ def topLobbyists(dbConn):
     # Ask for a year + get an object
     yearVal = input("Enter the year: ")
 
-    return objecttier.get_top_N_lobbyists(dbConn, nVal, yearVal)
+    result = objecttier.get_top_N_lobbyists(dbConn, nVal, yearVal)
+
+    if (result is not None):
+
+        # print("\nTop", nVal, "Lobbyists for", yearVal, ":\n")
+
+        lobbyistCount = 1
+        for currLobbyist in result:
+            print(f"{lobbyistCount} .", currLobbyist.First_Name, currLobbyist.Last_Name)
+            print("  Phone:", currLobbyist.Phone)
+            print(f"  Total Compensation: ${currLobbyist.Total_Compensation:,.2f}")
+
+            print("  Clients:", end=' ')
+
+            # Iterate through client list:
+            # print("Client count:", len(currLobbyist.Clients))
+
+            for j in range(0, len(currLobbyist.Clients)):
+                print(f"{currLobbyist.Clients[j]}", end=', ')
+            
+            print()
+            lobbyistCount = lobbyistCount + 1
+    
+    print()
+
+    # print(N, "lobbyists listed:\n")
+    # print()
 
     # End topLobbyists()
 
@@ -83,7 +146,13 @@ def addLobbyistYear(dbConn):
     newYear = input("Enter year: ")
     IDtoModify = input("Enter the lobbyist ID: ")
    
-    return objecttier.add_lobbyist_year(dbConn, IDtoModify, newYear)
+    result = objecttier.add_lobbyist_year(dbConn, IDtoModify, newYear)
+
+    if (result): # Successfully added year to given lobbyist
+        print("\nLobbyist successfully registered.\n")
+
+    else: # adding a year to the given lobbyist has failed for some reason
+        print('\033[91m' + '\033[1m' + "\nadd_lobbyist_year failed" + '\033[0m')
 
     # End addLobbyistYear()
 
@@ -94,7 +163,12 @@ def modifySalutation(dbConn):
     IDtoModify = input("Enter the lobbyist ID: ")
     newSalutation = input("Enter the salutation: ")
     
-    return objecttier.set_salutation(dbConn, IDtoModify, newSalutation)
+    result = objecttier.set_salutation(dbConn, IDtoModify, newSalutation)
+
+    if (result):
+        print("\nSalutation successfully set.\n")
+    else:
+        print("set_salutation failed")
 
     # End modifySalutation()
 
