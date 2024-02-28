@@ -771,7 +771,12 @@ def add_lobbyist_year(dbConn, lobbyist_id, year):
       lobbyist_id = idNum
       insertionResults = datatier.select_n_rows(dbConn, insertionQuery, [lobbyist_id, year])
 
-      if (len(insertionResults) == 0):  # If successfully added, commit to database
+      # if (len(insertionResults) == 0):  # If successfully added, commit to database
+      if (dbConn.total_changes <= 0): # If successfully added, commit to database
+         dbConn.commit()
+         return 0
+      
+      elif (dbConn.total_changes == 1):
          dbConn.commit()
          return 1
       else:
@@ -860,61 +865,61 @@ def set_salutation(dbConn, lobbyist_id, salutation):
 # This is mainly so I can keep testing the add_year function without changing
 # the actual database too much.  If you want to implement it, all you need to
 # do is uncomment this section and provide a lobbyist_id and year.
-# def delLobbyYearTEMP(dbConn, lobbyist_id, year):
+def delLobbyYearTEMP(dbConn, lobbyist_id, year):
 
-#    # Warns the user that this is a temporary function, and is not available in the official version.
-#    print('\033[91m' + '\033[1m' + "--------\nWarning: This Function MUST be removed before submission\n--------" + '\033[0m')
-#    # For more info on the above text/char combos, see:
-#    # https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
+   # Warns the user that this is a temporary function, and is not available in the official version.
+   print('\033[91m' + '\033[1m' + "--------\nWarning: This Function MUST be removed before submission\n--------" + '\033[0m')
+   # For more info on the above text/char combos, see:
+   # https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
 
-#    # Verify ID
-#    validIDQuery = """
-#       SELECT
-#          LobbyistInfo.First_Name AS NameExists
-#       FROM
-#          LobbyistInfo
-#       WHERE
-#          LobbyistInfo.Lobbyist_ID = ?;
-#    """
+   # Verify ID
+   validIDQuery = """
+      SELECT
+         LobbyistInfo.First_Name AS NameExists
+      FROM
+         LobbyistInfo
+      WHERE
+         LobbyistInfo.Lobbyist_ID = ?;
+   """
 
-#    # Delete the year, given the proper parameters
-#    deletionQuery = """
-#       DELETE FROM 
-#          LobbyistYears
-#       WHERE
-#          LobbyistYears.Lobbyist_ID = ?
-#          AND
-#          LobbyistYears.Year = ? ;
-#    """
+   # Delete the year, given the proper parameters
+   deletionQuery = """
+      DELETE FROM 
+         LobbyistYears
+      WHERE
+         LobbyistYears.Lobbyist_ID = ?
+         AND
+         LobbyistYears.Year = ? ;
+   """
 
-#    # Compatability
-#    idNum = lobbyist_id
-#    lobbyist_id = (''.join(lobbyist_id),)
+   # Compatability
+   idNum = lobbyist_id
+   lobbyist_id = (''.join(lobbyist_id),)
 
-#    # Confirm the ID entered is actually valid
-#    validID = datatier.select_n_rows(dbConn, validIDQuery, lobbyist_id)
+   # Confirm the ID entered is actually valid
+   validID = datatier.select_n_rows(dbConn, validIDQuery, lobbyist_id)
 
-#    if (validID == []):  # If an empty list is returned, no match is found
-#       print('\033[91m' + '\033[1m' + "No lobbyist with that ID was found.\n" + '\033[0m')
-#       return 0
+   if (validID == []):  # If an empty list is returned, no match is found
+      print('\033[91m' + '\033[1m' + "No lobbyist with that ID was found.\n" + '\033[0m')
+      return 0
 
-#    try:
+   try:
 
-#       # Conversion + query the database
-#       lobbyist_id = idNum
-#       deletionResults = datatier.select_n_rows(dbConn, deletionQuery, [lobbyist_id, year])
+      # Conversion + query the database
+      lobbyist_id = idNum
+      deletionResults = datatier.select_n_rows(dbConn, deletionQuery, [lobbyist_id, year])
 
-#       if (len(deletionResults) == 0): # If successfully added, commit to database
-#          dbConn.commit()
-#          print("\n" + '\033[91m' + '\033[1m' + "Lobbyist successfully unregistered.\n" + '\033[0m')
-#          return 1
-#       else:
-#          return 0
+      if (len(deletionResults) == 0): # If successfully added, commit to database
+         dbConn.commit()
+         print("\n" + '\033[91m' + '\033[1m' + "Lobbyist successfully unregistered.\n" + '\033[0m')
+         return 1
+      else:
+         return 0
 
-#    # Catch exceptions and return 0
-#    except Exception as e:
-#       print("\ndelLobbyYearTEMP failed:", e)
-#       print() # Formatting
-#       return 0
+   # Catch exceptions and return 0
+   except Exception as e:
+      print("\ndelLobbyYearTEMP failed:", e)
+      print() # Formatting
+      return 0
    
 #    # End delLobbyYearTEMP()

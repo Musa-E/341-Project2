@@ -22,9 +22,9 @@ def print_stats(dbConn):
         return None
 
     # Call the object tier's functions
-    print(f" Number of Lobbyists: {objecttier.num_lobbyists(dbConn):,}")
-    print(f" Number of Employers: {objecttier.num_employers(dbConn):,}")
-    print(f" Number of Clients: {objecttier.num_clients(dbConn):,}")
+    print(f"  Number of Lobbyists: {objecttier.num_lobbyists(dbConn):,}")
+    print(f"  Number of Employers: {objecttier.num_employers(dbConn):,}")
+    print(f"  Number of Clients: {objecttier.num_clients(dbConn):,}")
 
     # End print_stats()
 
@@ -33,13 +33,15 @@ def print_stats(dbConn):
 def lobbyistSearch(dbConn):
 
     # Get input + object based on said input
-    nameSearch = input("Enter lobbyist name (first or last, wildcards _ and % supported): ")
+    nameSearch = input("\nEnter lobbyist name (first or last, wildcards _ and % supported): ")
     
     lobbyistList = objecttier.get_lobbyists(dbConn, nameSearch)
 
+    print("\nNumber of lobbyists found:", len(lobbyistList))
+
     # If there are more than 100 matches, display error message and prompt user to narrow search
     if (len(lobbyistList) > 100):
-        print("There are too many lobbyists to display, please narrow your search and try again...\n")
+        print("\nThere are too many lobbyists to display, please narrow your search and try again...\n")
         return
 
     # Loop through each lobbyist, even if 0 there's shouldn't be a problem
@@ -55,17 +57,18 @@ def lobbyistSearch(dbConn):
 def lobbiystLookup(dbConn):
 
     # Get input + object based on said input
-    IDSearch = input("Enter Lobbyist ID: ")
+    IDSearch = input("\nEnter Lobbyist ID: ")   
 
     result = objecttier.get_lobbyist_details(dbConn, IDSearch)
 
     if (result is not None):
 
+        print()
         print(result.Lobbyist_ID, ":")
 
         # Output
-        print("  Full Name: " + result.Salutation, result.First_Name, result.Middle_Initial, result.Last_Name)
-        print("  Address: " + result.Address_1 + ", " + result.City + " , " + result.State_Initial, result.Zip_Code,", " + result.Country)
+        print("  Full Name: " + result.Salutation, result.First_Name, result.Middle_Initial, result.Last_Name, result.Suffix)
+        print("  Address: " + result.Address_1, result.Address_2, ",", result.City + " , " + result.State_Initial, result.Zip_Code, result.Country)
         print("  Email: " + result.Email)
         print("  Phone: " + result.Phone)
         print("  Fax: " + result.Fax)
@@ -82,7 +85,9 @@ def lobbiystLookup(dbConn):
 
         print(f"\n  Total Compensation: ${result.Total_Compensation:,.2f}")
         print() # Formatting
-    
+    else:
+        print("\nNo lobbyist with that ID was found.\n")
+
     # End lobbiystLookup()
 
 
@@ -90,7 +95,7 @@ def lobbiystLookup(dbConn):
 def topLobbyists(dbConn):
 
     # Get input
-    nVal = input("Enter the value of N: ")
+    nVal = input("\nEnter the value of N: ")
     
     # If N val is a digit, check if it's a positive value
     if (nVal.isdigit()):
@@ -116,6 +121,7 @@ def topLobbyists(dbConn):
         # print("\nTop", nVal, "Lobbyists for", yearVal, ":\n")
 
         lobbyistCount = 1
+        print()
         for currLobbyist in result:
             print(f"{lobbyistCount} .", currLobbyist.First_Name, currLobbyist.Last_Name)
             print("  Phone:", currLobbyist.Phone)
@@ -143,16 +149,16 @@ def topLobbyists(dbConn):
 
 def addLobbyistYear(dbConn):
 
-    newYear = input("Enter year: ")
+    newYear = input("\nEnter year: ")
     IDtoModify = input("Enter the lobbyist ID: ")
    
     result = objecttier.add_lobbyist_year(dbConn, IDtoModify, newYear)
 
-    if (result): # Successfully added year to given lobbyist
+    if (result == 1): # Successfully added year to given lobbyist
         print("\nLobbyist successfully registered.\n")
 
     else: # adding a year to the given lobbyist has failed for some reason
-        print('\033[91m' + '\033[1m' + "\nadd_lobbyist_year failed" + '\033[0m')
+        print("\nNo lobbyist with that ID was found.")
 
     # End addLobbyistYear()
 
@@ -195,7 +201,7 @@ def commandDriver(userChoice, dbConn):
 
     # If the user wants to exit
     elif (userChoice == 'x'):
-        print()
+        # print()
         exit(0)
     
     # Temporary functionality that allows a user to delete a year for a lobbyist
@@ -222,14 +228,14 @@ def commandDriver(userChoice, dbConn):
 #
 def main():
 
-    print('** Welcome to the Chicago Lobbyist Database Application **')
+    print('** Welcome to the Chicago Lobbyist Database Application **\n')
     dbConn = sqlite3.connect('Chicago_Lobbyists.db');
 
     if (dbConn != None):
         print_stats(dbConn);
 
     # print()
-    userChoice = input("Please enter a command (1-5, x to exit): ")
+    userChoice = input("\nPlease enter a command (1-5, x to exit): ")
     commandDriver(userChoice, dbConn)
 
     # Keep looping for user input until they want to exit
