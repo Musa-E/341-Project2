@@ -166,6 +166,7 @@ def addLobbyistYear(dbConn):
 
 def modifySalutation(dbConn):
 
+    print()
     IDtoModify = input("Enter the lobbyist ID: ")
     newSalutation = input("Enter the salutation: ")
     
@@ -208,11 +209,11 @@ def commandDriver(userChoice, dbConn):
     # This is offered as an "undo-button" for command 4, and will be commented out,
     # but remain in the file.  If you want to use it, uncomment this section and
     # the relevant function in objecttier.py (used below), plug-and-play style.
-    elif (userChoice == '6'):
-        delYear = input('\033[91m' + '\033[1m' + "TEMP CMD - DELETE a Year: " + '\033[0m')
-        IDtoModify = input('\033[91m' + '\033[1m' + "Enter the lobbyist ID: " + '\033[0m')
+    # elif (userChoice == '6'):
+    #     delYear = input('\033[91m' + '\033[1m' + "TEMP CMD - DELETE a Year: " + '\033[0m')
+    #     IDtoModify = input('\033[91m' + '\033[1m' + "Enter the lobbyist ID: " + '\033[0m')
 
-        objecttier.delLobbyYearTEMP(dbConn, IDtoModify, delYear)
+    #     objecttier.delLobbyYearTEMP(dbConn, IDtoModify, delYear)
 
     # A valid command must be entered to continue the program
     else:
